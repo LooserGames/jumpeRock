@@ -10,24 +10,51 @@ public class rockControll : MonoBehaviour
     [SerializeField] private float rockSpeed;
     [SerializeField] private List<GameObject> engeller;
     [SerializeField] private List<Texture> catlamaTexture;
+    [SerializeField] private Animator cam;
+    [SerializeField] private ParticleSystem rayfire;
 
 
     private Rigidbody rb;
     private string engelTag;
+    
+    private int sayi = 6;
+    private int carpma=3;
+    private bool isCollide=false;
     
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         StartCoroutine(EngelList());
+        cam.gameObject.GetComponent<Animator>();
     }
 
     // Update is called once per frame
     void Update()
     {
        RockMove();
-       
-       
+
+       RaycastHit hit;
+       if (rb.SweepTest(transform.position, out hit, 3))
+       {
+           rockSpeed = 5;
+       }
+       else
+       {
+           rockSpeed = 50;
+       }
+
+       if (isCollide)
+       {
+           cam.SetBool("isCollide",true);
+           isCollide = false;
+       }
+       else
+       {
+           cam.SetBool("isCollide",false); 
+       }
+
+
     }
 
     void RockMove()
@@ -45,12 +72,25 @@ public class rockControll : MonoBehaviour
             }
         }
     }
-    
-    
-    
-    private int sayi = 6;
-    private int carpma=3;
+
     private void OnCollisionEnter(Collision other)
+    {
+        isCollide = true;
+
+        if (other.gameObject.tag == "tahta")
+        {
+            other.gameObject.SetActive(false);
+            rayfire.gameObject.SetActive(true);
+
+        }
+        else
+        {
+            rayfire.gameObject.SetActive(false);
+        }
+    }
+
+
+    private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "engel")
         {
@@ -110,7 +150,7 @@ public class rockControll : MonoBehaviour
             }
         }
 
-        Camera.main.transform.Rotate(Vector3.Lerp(new Vector3(0,0,45f),new Vector3(0,0,0),Time.deltaTime*10000f ));
+        
     }
 
     IEnumerator EngelList()

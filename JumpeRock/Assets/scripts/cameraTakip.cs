@@ -14,6 +14,6 @@ public class cameraTakip : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position=new Vector3(transform.position.x,target.transform.position.y-2,transform.position.z);
+        transform.position=new Vector3(transform.position.x,target.transform.position.y-3,transform.position.z);
     }
 }

@@ -94,12 +94,13 @@ public class rockControll : MonoBehaviour
     {
         if (other.gameObject.tag == "engel")
         {
+             
             for (int i = sayi; i <= engeller.Count; i--)
             {
 
                 if (carpma >= 0)
                 {
-                    if (carpma == 3)
+                   /* if (carpma == 3)
                     {
                         engeller[i - 1].GetComponent<MeshRenderer>().material.mainTexture = catlamaTexture[0];
                         engeller[i - 1].GetComponent<MeshRenderer>().material.mainTextureScale=new Vector2(1f,1f);
@@ -123,11 +124,13 @@ public class rockControll : MonoBehaviour
                         engeller[i - 1].GetComponent<MeshRenderer>().material.mainTextureOffset =
                             new Vector2(0.3f,0f);
 
-                    }
+                    }*/
                     
-                   else if (carpma==0)
+                    if (carpma==0)
                     {
-                        engeller[i-1].SetActive(false);
+                        //engeller[i-1].SetActive(false);
+                        //engeller[i-1].GetComponent<Animator>().SetBool("isCollide",true);
+                        StartCoroutine(rockDisintegration(engeller[i - 1].gameObject, "isCollide", true));
                         if (sayi > 2)
                         {
                             sayi--;
@@ -160,5 +163,13 @@ public class rockControll : MonoBehaviour
         {
             engeller.Add(a.gameObject);
         }
+    }
+
+    IEnumerator rockDisintegration(GameObject rock,string value, bool boolean)
+    {
+        yield return new WaitForSeconds(0.1f);
+        rock.GetComponent<Animator>().SetBool(value,boolean);
+        yield return new WaitForSeconds(0.7f);
+        rock.SetActive(false);
     }
 }

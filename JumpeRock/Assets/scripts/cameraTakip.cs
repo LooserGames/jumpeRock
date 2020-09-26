@@ -4,16 +4,18 @@ using UnityEngine;
 
 public class cameraTakip : MonoBehaviour
 {
-    // Start is called before the first frame update
-    [SerializeField] private GameObject target;
-    void Start()
-    {
-        
-    }
+    public Transform target;
 
-    // Update is called once per frame
-    void Update()
+    public float smoothSpeed = 0.125f;
+    public Vector3 offset;
+
+    void FixedUpdate ()
     {
-        transform.position=new Vector3(transform.position.x,target.transform.position.y,transform.position.z);
+        Vector3 desiredPosition = target.position + offset;
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+        transform.position = smoothedPosition;
+        transform.rotation=new Quaternion(target.transform.position.y,0,0,0);
+
+        transform.LookAt(target);
     }
 }

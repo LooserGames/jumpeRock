@@ -37,11 +37,11 @@ public class rockControll : MonoBehaviour
        RaycastHit hit;
        if (rb.SweepTest(transform.position, out hit, 3))
        {
-           rockSpeed = 5;
+           rockSpeed = 100;
        }
        else
        {
-           rockSpeed = 50;
+           rockSpeed = 200;
        }
 
        if (isCollide)
@@ -64,11 +64,13 @@ public class rockControll : MonoBehaviour
             float x = Input.mousePosition.x/2;
             if (x < 320)
             {
-                rb.MovePosition(transform.position+Vector3.left*Time.deltaTime*rockSpeed);
+                //rb.MovePosition(transform.position+Vector3.left*Time.deltaTime*rockSpeed);
+                rb.velocity+=Vector3.left*Time.deltaTime*rockSpeed;
             }
             else
             {
-                rb.MovePosition(transform.position+Vector3.right*Time.deltaTime*rockSpeed);
+                //rb.MovePosition(transform.position+Vector3.right*Time.deltaTime*rockSpeed);
+                rb.velocity+=Vector3.right*Time.deltaTime*rockSpeed;
             }
         }
     }

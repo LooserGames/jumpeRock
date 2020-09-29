@@ -8,6 +8,7 @@ public class rockControll : MonoBehaviour
 {
 
     [SerializeField] private float rockSpeed;
+    [SerializeField] private float rockUpSpeed;
     [SerializeField] private List<GameObject> engeller;
     [SerializeField] private List<Texture> catlamaTexture;
     [SerializeField] private Animator cam;
@@ -21,6 +22,12 @@ public class rockControll : MonoBehaviour
     private int carpma=3;
     private bool isCollide=false;
     
+    
+	
+
+	
+  
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +40,7 @@ public class rockControll : MonoBehaviour
     void Update()
     {
        RockMove();
+       RockMoveSpeed();
 
        RaycastHit hit;
        if (rb.SweepTest(transform.position, out hit, 3))
@@ -46,23 +54,36 @@ public class rockControll : MonoBehaviour
 
        if (isCollide)
        {
-           cam.SetBool("isCollide",true);
+           
            isCollide = false;
        }
        else
        {
-           cam.SetBool("isCollide",false); 
+           //cam.SetBool("isCollide",false); 
+         
        }
 
 
     }
+    
+    //Camera shake
+    
+   
+    
+    /// <summary>
+    /// //////////////////////////////////////////////////////////////////////////////////////////
+    /// </summary>
+
 
     void RockMove()
     {
         if (Input.GetMouseButton(0))
         {
-            float x = Input.mousePosition.x/2;
-            if (x < 320)
+            Vector3 camX = Camera.main.ScreenToViewportPoint(new Vector3(Input.mousePosition.x,0,0)/2/2);
+            
+            
+            
+            if (camX.x < 0.13f)
             {
                 //rb.MovePosition(transform.position+Vector3.left*Time.deltaTime*rockSpeed);
                 rb.velocity+=Vector3.left*Time.deltaTime*rockSpeed;
@@ -74,6 +95,29 @@ public class rockControll : MonoBehaviour
             }
         }
     }
+    
+    void RockMoveSpeed()
+        {
+            if (Input.GetMouseButton(0))
+            {
+                Vector3 camY = Camera.main.ScreenToViewportPoint(new Vector3(0,Input.mousePosition.y,0));
+                
+                print(camY.y);
+                
+                if (camY.y < 0.13f)
+                {
+                    //rb.MovePosition(transform.position+Vector3.left*Time.deltaTime*rockSpeed);
+                    cam.GetComponent<cameraTakip>().smoothSpeed = 0.125f;
+                    rb.drag = 0;
+                }
+                else
+                {
+                    //rb.MovePosition(transform.position+Vector3.right*Time.deltaTime*rockSpeed);
+                    cam.GetComponent<cameraTakip>().smoothSpeed = 0.5f;
+                    rb.drag = 0.5f;
+                }
+            }
+        }
 
     private void OnCollisionEnter(Collision other)
     {
@@ -83,11 +127,8 @@ public class rockControll : MonoBehaviour
         {
             other.gameObject.SetActive(false);
             rayfire.gameObject.SetActive(true);
+            StartCoroutine(rayFire(rayfire.gameObject));
 
-        }
-        else
-        {
-            rayfire.gameObject.SetActive(false);
         }
     }
 
@@ -174,4 +215,12 @@ public class rockControll : MonoBehaviour
         yield return new WaitForSeconds(0.7f);
         rock.SetActive(false);
     }
+    
+    IEnumerator rayFire(GameObject particle)
+    {
+        yield return new WaitForSeconds(0.3f);
+        particle.SetActive(false);
+    }
+
+   
 }

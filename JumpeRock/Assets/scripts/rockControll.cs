@@ -77,6 +77,7 @@ public class rockControll : MonoBehaviour
 
     void RockMove()
     {
+        rb.velocity=new Vector3(rb.velocity.x,-240,rb.velocity.z);
         if (Input.GetMouseButton(0))
         {
             Vector3 camX = Camera.main.ScreenToViewportPoint(new Vector3(Input.mousePosition.x,0,0)/2/2);
@@ -108,13 +109,13 @@ public class rockControll : MonoBehaviour
                 {
                     //rb.MovePosition(transform.position+Vector3.left*Time.deltaTime*rockSpeed);
                     cam.GetComponent<cameraTakip>().smoothSpeed = 0.125f;
-                    rb.drag = 0;
+                   // rb.drag = 0;
                 }
                 else
                 {
                     //rb.MovePosition(transform.position+Vector3.right*Time.deltaTime*rockSpeed);
                     cam.GetComponent<cameraTakip>().smoothSpeed = 0.5f;
-                    rb.drag = 0.5f;
+                    //rb.drag = 0.5f;
                 }
             }
         }
@@ -174,6 +175,7 @@ public class rockControll : MonoBehaviour
                         //engeller[i-1].SetActive(false);
                         //engeller[i-1].GetComponent<Animator>().SetBool("isCollide",true);
                         StartCoroutine(rockDisintegration(engeller[i - 1].gameObject, "isCollide", true));
+                        StartCoroutine(rockDisintegration(other.gameObject, "isCollide", true));
                         if (sayi > 2)
                         {
                             sayi--;
@@ -182,8 +184,9 @@ public class rockControll : MonoBehaviour
                     }
                     
                     
-                    other.gameObject.SetActive(false);
-
+                    //other.gameObject.SetActive(false);
+                    
+                    StartCoroutine(sarkitDisintegration(other.gameObject, "isCollide", true));
                     carpma--;
                     
                     break;
@@ -213,6 +216,15 @@ public class rockControll : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         rock.GetComponent<Animator>().SetBool(value,boolean);
         yield return new WaitForSeconds(0.7f);
+        rock.SetActive(false);
+    }
+    
+    IEnumerator sarkitDisintegration(GameObject rock,string value, bool boolean)
+    {
+        yield return new WaitForSeconds(0.0f);
+        rock.GetComponent<Animator>().SetBool(value,boolean);
+        yield return new WaitForSeconds(0.7f);
+        rock.GetComponent<Animator>().SetBool(value,false);
         rock.SetActive(false);
     }
     

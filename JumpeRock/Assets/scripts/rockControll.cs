@@ -8,15 +8,30 @@ public class rockControll : MonoBehaviour
 {
 
     [SerializeField] private float rockSpeed;
-    [SerializeField] private float rockUpSpeed;
     [SerializeField] private List<GameObject> engeller;
     [SerializeField] private List<Texture> catlamaTexture;
     [SerializeField] private Animator cam;
+    
+    
+    [Header("ParticleSystem")]
     [SerializeField] private ParticleSystem rayfire;
+    [SerializeField] private ParticleSystem bombFire;
+    [SerializeField] private ParticleSystem meteorTile;
+    [SerializeField] private ParticleSystem windTile;
+
+    [Header("audioSource")] [SerializeField]
+    private AudioSource effectSound;
+
+    [Header("Audio")] [SerializeField] private AudioClip coinSound;
+
+    [SerializeField] private AudioClip sarkitSes;
+    [SerializeField] private AudioClip tahtaSes;
+    [SerializeField] private AudioClip bombSound;
 
 
     private Rigidbody rb;
     private string engelTag;
+    private bool isbomb=false;
     
     private int sayi = 6;
     private int carpma=3;
@@ -49,7 +64,7 @@ public class rockControll : MonoBehaviour
        }
        else
        {
-           rockSpeed = 200;
+           rockSpeed = 3000;
        }
 
        if (isCollide)
@@ -77,7 +92,7 @@ public class rockControll : MonoBehaviour
 
     void RockMove()
     {
-        rb.velocity=new Vector3(rb.velocity.x,-240,rb.velocity.z);
+        rb.velocity=new Vector3(rb.velocity.x,-360,rb.velocity.z);
         if (Input.GetMouseButton(0))
         {
             Vector3 camX = Camera.main.ScreenToViewportPoint(new Vector3(Input.mousePosition.x,0,0)/2/2);
@@ -103,7 +118,6 @@ public class rockControll : MonoBehaviour
             {
                 Vector3 camY = Camera.main.ScreenToViewportPoint(new Vector3(0,Input.mousePosition.y,0));
                 
-                print(camY.y);
                 
                 if (camY.y < 0.13f)
                 {
@@ -127,8 +141,13 @@ public class rockControll : MonoBehaviour
         if (other.gameObject.tag == "tahta")
         {
             other.gameObject.SetActive(false);
-            rayfire.gameObject.SetActive(true);
-            StartCoroutine(rayFire(rayfire.gameObject));
+            //rayfire.gameObject.SetActive(true);
+            rayfire.Play();
+            effectSound.clip = tahtaSes;
+            effectSound.PlayOneShot(effectSound.clip);
+            //other.gameObject.GetComponent<Animator>().SetBool("tahtaKir",true);
+            // StartCoroutine(sarkitDisintegration(other.gameObject, "tahtaKir", true));
+            //StartCoroutine(rayFire(rayfire.gameObject));
 
         }
     }
@@ -136,14 +155,76 @@ public class rockControll : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+
+        if (other.gameObject.tag == "madenAlani")
+        {
+            cam.GetComponent<cameraTakip>().smoothSpeed = 0.05f;
+            windTile.gameObject.SetActive(false);
+            meteorTile.gameObject.SetActive(true);
+        }
+        
+        
+        
+        if (other.gameObject.tag == "bomb")
+        {
+            effectSound.clip = bombSound;
+            effectSound.PlayOneShot(effectSound.clip);
+            bombFire.Play();
+            other.transform.GetChild(0).GetComponent<MeshRenderer>().enabled = false;
+            other.transform.GetChild(1).GetComponent<MeshRenderer>().enabled = false;
+            StartCoroutine(ObjectSetactive(other.gameObject));
+            if (other.transform.position.x < 0)
+            {
+                /*if (sayi > 2)
+                {
+                    sayi--;
+                }
+
+                carpma = 3;*/
+                carpma = 0;
+                rb.velocity=Vector3.right*Time.deltaTime*rockSpeed*300;
+                isbomb = true;
+                
+
+            }
+            else
+            {
+                carpma = 0;
+                rb.velocity=Vector3.left*Time.deltaTime*rockSpeed*300;
+                isbomb = true;
+                
+
+            }
+        }
+
+        if (other.gameObject.tag == "coin")
+        {
+            effectSound.clip = coinSound;
+            effectSound.PlayOneShot(effectSound.clip);
+            other.gameObject.SetActive(false);
+        }
+        
+        
         if (other.gameObject.tag == "engel")
         {
+           /* if (isbomb)
+            {
+                if (sayi > 2)
+                {
+                    sayi--;
+                }
+                carpma = 3;
+                isbomb = false;
+            }*/
+           
+           effectSound.clip = sarkitSes;
+           effectSound.PlayOneShot(effectSound.clip);
              
             for (int i = sayi; i <= engeller.Count; i--)
             {
 
-                if (carpma >= 0)
-                {
+                if (carpma > 0)
+                { 
                    /* if (carpma == 3)
                     {
                         engeller[i - 1].GetComponent<MeshRenderer>().material.mainTexture = catlamaTexture[0];
@@ -169,33 +250,40 @@ public class rockControll : MonoBehaviour
                             new Vector2(0.3f,0f);
 
                     }*/
+                  
                     
                     if (carpma==0)
                     {
                         //engeller[i-1].SetActive(false);
                         //engeller[i-1].GetComponent<Animator>().SetBool("isCollide",true);
-                        StartCoroutine(rockDisintegration(engeller[i - 1].gameObject, "isCollide", true));
-                        StartCoroutine(rockDisintegration(other.gameObject, "isCollide", true));
-                        if (sayi > 2)
-                        {
-                            sayi--;
-                        }
-                        carpma = 3;
+                        
                     }
                     
                     
                     //other.gameObject.SetActive(false);
                     
-                    StartCoroutine(sarkitDisintegration(other.gameObject, "isCollide", true));
+                    StartCoroutine(sarkitDisintegration(other.gameObject, "degdi", true));
+                    other.GetComponent<Collider>().enabled = false;
                     carpma--;
-                    
+                   
+
                     break;
                 }
                 else
                 {
+                    StartCoroutine(rockDisintegration(engeller[i - 1].gameObject, "isCollide", true));
+                        
+                    if (sayi > 2)
+                    {
+                        sayi--;
+                    }
+                    carpma = 3;
+                    
                     i = sayi;
-                    break;
+                    
                 }
+
+                break;
             }
         }
 
@@ -215,7 +303,7 @@ public class rockControll : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         rock.GetComponent<Animator>().SetBool(value,boolean);
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSeconds(3f);
         rock.SetActive(false);
     }
     
@@ -223,7 +311,7 @@ public class rockControll : MonoBehaviour
     {
         yield return new WaitForSeconds(0.0f);
         rock.GetComponent<Animator>().SetBool(value,boolean);
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSeconds(1f);
         rock.GetComponent<Animator>().SetBool(value,false);
         rock.SetActive(false);
     }
@@ -232,6 +320,12 @@ public class rockControll : MonoBehaviour
     {
         yield return new WaitForSeconds(0.3f);
         particle.SetActive(false);
+    }
+
+    IEnumerator ObjectSetactive(GameObject myObject)
+    {
+        yield return new WaitForSeconds(0.5f);
+        myObject.SetActive(false);
     }
 
    

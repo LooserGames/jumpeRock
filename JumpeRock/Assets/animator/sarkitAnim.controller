@@ -9,7 +9,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: isCollide
+    m_ConditionEvent: degdi
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -1604318490550126336}
@@ -61,7 +61,7 @@ AnimatorController:
   m_Name: sarkitAnim
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: isCollide
+  - m_Name: degdi
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -142,7 +142,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: isCollide
+    m_ConditionEvent: degdi
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 5237664460056007751}

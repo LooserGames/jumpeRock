@@ -13,8 +13,9 @@ public class cameraTakip : MonoBehaviour
     void FixedUpdate ()
     {
         this.transform.LookAt(target);
+       // transform.rotation=Quaternion.LookRotation(target.position);
         Vector3 desiredPosition = target.position + offset;
-        Vector3 smoothedPosition = Vector3.Lerp(transform.position, new Vector3(transform.position.x,desiredPosition.y,transform.position.z), smoothSpeed);
+        Vector3 smoothedPosition = Vector3.Lerp(transform.position, new Vector3(target.transform.position.x,desiredPosition.y,transform.position.z), smoothSpeed);
         transform.position = smoothedPosition;
 
 

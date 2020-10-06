@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Rendering;
 
 public class uiScript : MonoBehaviour
 {
@@ -17,7 +19,9 @@ public class uiScript : MonoBehaviour
     [SerializeField] private AudioSource skorXSound;
     [SerializeField] private AudioSource scorSound;
     [SerializeField] private AudioSource cleamSound;
-    
+
+
+    [Header("Panel")] [SerializeField] private GameObject winPanel;
     
     
     
@@ -33,29 +37,42 @@ public class uiScript : MonoBehaviour
         
     }
 
-    IEnumerator UiAnimatonPlay()
+IEnumerator UiAnimatonPlay()
     {
         yield return new WaitForSeconds(0.1f);
-        great.SetBool("great",true);
-        greatSound.PlayOneShot(greatSound.clip);
+        if (winPanel.activeSelf)
+        {
+            great.SetBool("great",true);
+            greatSound.PlayOneShot(greatSound.clip);
 
-        yield return new WaitForSeconds(0.5f);
-        great.SetBool("great",false);
-        skorX.SetBool("skorx",true);
-        skorXSound.PlayOneShot(skorXSound.clip);
+            yield return new WaitForSeconds(0.5f);
+            great.SetBool("great",false);
+            skorX.SetBool("skorx",true);
+            skorXSound.PlayOneShot(skorXSound.clip);
         
-        yield return new WaitForSeconds(0.5f);
-        skorX.SetBool("scorx",false);
-        scor.SetBool("scor",true);
-        scorSound.PlayOneShot(scorSound.clip);
+            yield return new WaitForSeconds(0.5f);
+            skorX.SetBool("scorx",false);
+            scor.SetBool("scor",true);
+            scorSound.PlayOneShot(scorSound.clip);
         
-        yield return new WaitForSeconds(0.5f);
-        scor.SetBool("scor",false);
-        cleam.SetBool("cleam",true);
-        cleamSound.PlayOneShot(cleamSound.clip);
+            yield return new WaitForSeconds(0.5f);
+            scor.SetBool("scor",false);
+            cleam.SetBool("cleam",true);
+            cleamSound.PlayOneShot(cleamSound.clip);
 
         
-        yield return new WaitForSeconds(0.5f);
-        cleam.SetBool("cleam",false);
+            yield return new WaitForSeconds(0.5f);
+            cleam.SetBool("cleam",false);
+        }
+        else
+        {
+            yield return UiAnimatonPlay();
+        }
     }
+
+
+public void selam()
+{
+    print("merhaba");
+}
 }

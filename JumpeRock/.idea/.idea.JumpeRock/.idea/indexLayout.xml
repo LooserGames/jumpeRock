@@ -19,8 +19,10 @@
     <explicitExcludes>
       <Path>.idea</Path>
       <Path>.vscode</Path>
+      <Path>BackupUnusedAssets</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
+      <Path>UIElementsSchema</Path>
       <Path>obj</Path>
     </explicitExcludes>
   </component>

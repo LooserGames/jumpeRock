@@ -11,6 +11,7 @@ public class rockControll : MonoBehaviour
     [SerializeField] private float rockSpeed;
     [SerializeField] private List<GameObject> engeller;
     [SerializeField] private Animator cam;
+    [SerializeField] private Animator upPanel;
     
     
     [Header("ParticleSystem")]
@@ -19,6 +20,7 @@ public class rockControll : MonoBehaviour
     [SerializeField] private ParticleSystem meteorTile;
     [SerializeField] private ParticleSystem windTile;
     [SerializeField] private ParticleSystem snowParticle;
+    [SerializeField] private ParticleSystem duman;
 
     [Header("audioSource")] [SerializeField]
     private AudioSource effectSound;
@@ -31,6 +33,7 @@ public class rockControll : MonoBehaviour
     [SerializeField] private AudioClip sarkitSes2;
     [SerializeField] private AudioClip tahtaSes;
     [SerializeField] private AudioClip bombSound;
+    [SerializeField] private AudioClip rockBreak;
 
     [Header("PhysicMaterial")] [SerializeField]
     private PhysicMaterial wall;
@@ -67,7 +70,10 @@ public class rockControll : MonoBehaviour
     private int coinPuan=0;
     private bool rockRot=true;
     private int skorxPoint = 0;
+    private bool altinMadeni = false;
     IEnumerator cameraRot;
+    public bool isMoving2 = true;
+    private bool isWall=false;
     
 
 
@@ -78,32 +84,42 @@ public class rockControll : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         StartCoroutine(EngelList());
         cam.gameObject.GetComponent<Animator>();
-        StartCoroutine(cameraRot);
+        
         //StartCoroutine(RockPos());
         StartCoroutine(other());
         StartCoroutine(LastPos());
+       // StartCoroutine(meteorFalse());
 
 
     }
 
-    
-    
 
+    private float zaman;
     // Update is called once per frame
     void Update()
     {
+         zaman += Time.deltaTime;
+         print(carpma);
+         if (!altinMadeni)
+         {
+             AltinMadeniDisinda();
+         }
+         else
+         {
+             AltinMadeniIcinde();
+         }
         
         if (rockVelocityY)
         {
             rb.velocity=new Vector3(rb.velocity.x,-360,rb.velocity.z);
         }
         
-        if (isMoving)
+        if (isMoving && isMoving2)
         {
             RockMove();
             RockMoveSpeed();
         }
-        else
+        if(!isMoving && !isMoving2)
         {
             if (!cam.transform.hasChanged)
             {
@@ -157,6 +173,81 @@ public class rockControll : MonoBehaviour
     }
 
 
+    void AltinMadeniDisinda()
+    {
+        if (rb.velocity.magnitude > 360f && zaman>=4f)
+        {
+            meteorTile.gameObject.SetActive(true);
+            meteorTile.Play();
+            
+            if(zaman>=5f)
+            {
+                windTile.gameObject.SetActive(true);
+                windTile.Play();
+            }
+
+            if (!GetComponent<AudioSource>().isPlaying)
+            {
+                GetComponent<AudioSource>().Play();
+            }
+           
+        }
+        
+        
+        else if(rb.velocity.magnitude < 360f)
+        {
+            windTile.gameObject.SetActive(false);
+            meteorTile.gameObject.SetActive(false);
+            
+        }
+        if (GetComponent<AudioSource>().isPlaying)
+        {
+            GetComponent<AudioSource>().Stop();
+        }
+    }
+
+    void AltinMadeniIcinde()
+    {
+          print(rb.velocity.magnitude);
+        if (!rockRot && !isMoving && rb.velocity.magnitude>0 )
+        {
+            windTile.gameObject.SetActive(true);
+            meteorTile.gameObject.SetActive(true);
+            windTile.Play();
+            meteorTile.Play();
+            if (!GetComponent<AudioSource>().isPlaying)
+            {
+                GetComponent<AudioSource>().Play();
+            }
+        }
+        
+        if(rb.velocity.magnitude<5f || rb.velocity.magnitude<10f || rb.velocity.magnitude<20f)
+        {
+            if (altinMadeni)
+            {
+                altinMadeni = false;
+                isEnd = true;
+            }
+
+           
+            
+            windTile.gameObject.SetActive(false);
+            meteorTile.gameObject.SetActive(false);
+            duman.gameObject.SetActive(true);
+            duman.Play();
+            windTile.Stop();
+            meteorTile.Stop();
+            
+            if (GetComponent<AudioSource>().isPlaying)
+            {
+                GetComponent<AudioSource>().Stop();
+            }
+        }
+
+    }
+
+  
+
     void RockMove()
     {
         if (Input.GetMouseButton(0))
@@ -198,11 +289,66 @@ public class rockControll : MonoBehaviour
     private void OnCollisionEnter(Collision other)
     {
         isCollide = true;
-       
+        zaman = 2f;
+
+
+        if (other.gameObject.tag == "engel" )
+        {
+            StartCoroutine(ObjectDesiable(other.gameObject));
+
+            sarkitSesi = !sarkitSesi;
+            if (sarkitSesi)
+            {
+                effectSound.clip = sarkitSes;
+            }
+            else
+            {
+                effectSound.clip = sarkitSes2;
+            }
+
+            effectSound.PlayOneShot(effectSound.clip);
+
+            for (int i = sayi; i <= engeller.Count; i--)
+            {
+
+                if (carpma > 0)
+                {
+                    StartCoroutine(sarkitDisintegration(other.gameObject, "degdi", true));
+                    other.gameObject.GetComponent<Collider>().enabled = false;
+                    carpma--;
+
+
+                    break;
+                }
+                else
+                {
+                    StartCoroutine(rockDisintegration(engeller[i - 1].gameObject, "isCollide", true));
+
+                    if (sayi > 2)
+                    {
+                        sayi--;
+                        StartCoroutine(ObjectDesiableRock(transform.gameObject, engeller[i - 1].gameObject));
+                    }
+
+                    carpma = 3;
+
+                    i = sayi;
+
+                }
+
+                isWall = false;
+                break;
+            }
+
+        }
+
+
+
 
         if (other.gameObject.tag=="final")
         {
             isEnd = true;
+            StopCoroutine(cameraRot);
             StartCoroutine(Final());
         }
         
@@ -215,7 +361,65 @@ public class rockControll : MonoBehaviour
         {
             carpti = false;
         }
+
+        if (isbomb)
+        {
+            if (other.gameObject.tag == "wall")
+            {
+                carpma = 0;
+                isWall = true;
+                StartCoroutine(isKinematic(rb,other));
+                isbomb = false;
+                
+                
+                
+                if(carpma==0)
+                {
+                    StartCoroutine(rockDisintegration(engeller[sayi - 1].gameObject, "isCollide", true));
+
+                    if (sayi > 2)
+                    {
+                        sayi--;
+                        StartCoroutine(ObjectDesiableRock(transform.gameObject, engeller[sayi - 1].gameObject));
+                    }
+
+                    carpma = 3;
+
+            
+
+                }
+                
+            }
+        }
+        
+        
+        
     }
+
+    /// <summary>
+    /// Deneme Alanı
+    /// </summary>
+    /// <param name="other">
+    ///bu alanda kodlar denenecek
+    /// </param>
+
+   /* void reverseRockLayer()
+    {
+        for (int i = 0; i < engeller.Count; i++)
+        {
+            if (!engeller[i].activeSelf)
+            {
+                engeller[i].SetActive(true);
+                engeller[i].transform.GetChild(0).gameObject.SetActive(true);
+                engeller[i].GetComponent<Collider>().enabled = true;
+                sayi++;
+                carpma = 3;
+            }
+           
+        }
+    }*/
+   
+    ////////////////////////////////////////
 
 
     private void OnTriggerEnter(Collider other)
@@ -235,7 +439,7 @@ public class rockControll : MonoBehaviour
             rayfire.Play();
             effectSound.clip = tahtaSes;
             effectSound.PlayOneShot(effectSound.clip);
-            skorxPoint++;
+            skorxPoint+=2;
             coinPuan += 10;
             coinText.text = coinPuan.ToString();
 
@@ -253,19 +457,22 @@ public class rockControll : MonoBehaviour
 
         if (other.gameObject.tag == "madenAlani")
         {
+            altinMadeni = true;
             cam.GetComponent<cameraTakip>().smoothSpeed = 0.04f;
-            windTile.gameObject.SetActive(false);
+           // windTile.gameObject.SetActive(false);
             //meteorTile.gameObject.SetActive(true);
-            transform.GetChild(10).gameObject.SetActive(true);
-            transform.GetChild(10).GetComponent<ParticleSystem>().Play();
+            //transform.GetChild(10).gameObject.SetActive(true);
+           // transform.GetChild(10).GetComponent<ParticleSystem>().Play();
             
             snowParticle.gameObject.SetActive(false);
-            cam.transform.position = new Vector3(cam.transform.position.x,cam.transform.position.y,-218.83f);
+            cam.transform.position = new Vector3(cam.transform.position.x,cam.transform.position.y,-400f);
             rockSpeed = 0;
             isMoving = false;
+            isMoving2 = false;
             ruzgarSesi.Stop();
             rockRot = false;
-            GetComponent<AudioSource>().Play();
+            
+            StartCoroutine(cameraRot);
         }
         
         
@@ -281,19 +488,17 @@ public class rockControll : MonoBehaviour
             other.transform.GetChild(1).GetComponent<MeshRenderer>().enabled = false;
             StartCoroutine(rockStop(rb,other.gameObject));
             StartCoroutine(ObjectSetactive(other.gameObject));
+            
             if (other.transform.position.x < 0)
             {
-               
-                carpma = 0;
-                rb.velocity=Vector3.right*Time.deltaTime*rockSpeed*300;
-                isbomb = true;
                 
-
+                rb.velocity=Vector3.right*Time.deltaTime*rockSpeed*50;
+                isbomb = true;
             }
             else
             {
-                carpma = 0;
-                rb.velocity=Vector3.left*Time.deltaTime*rockSpeed*300;
+               
+                rb.velocity=Vector3.left*Time.deltaTime*rockSpeed*50;
                 isbomb = true;
                 
 
@@ -315,7 +520,7 @@ public class rockControll : MonoBehaviour
         if (other.gameObject.tag == "engel")
         {
             StartCoroutine(ObjectDesiable(other.gameObject));
-
+            
             sarkitSesi = !sarkitSesi;
             if (sarkitSesi)
             {
@@ -355,6 +560,7 @@ public class rockControll : MonoBehaviour
                     
                 }
 
+                isWall = false;
                 break;
             }
         }
@@ -366,6 +572,7 @@ public class rockControll : MonoBehaviour
             other.transform.GetChild(2).GetComponent<AudioSource>().Play();
             StartCoroutine(musicPause());
             StartCoroutine(kusyuvasiParticle(other.gameObject));
+            //reverseRockLayer();
         }
        
 
@@ -377,18 +584,19 @@ public class rockControll : MonoBehaviour
         yield return new WaitForSeconds(0);
         other.transform.GetChild(1).gameObject.GetComponent<ParticleSystem>().Play();
         other.transform.GetChild(3).gameObject.GetComponent<ParticleSystem>().Play();
+        upPanel.SetBool("kusYuvasi",true);
         int sonuc;
-        if (coinPuan >= 100)
-        {
-            sonuc = coinPuan - 100;
+        
+            sonuc = coinPuan * 0;
             coinPuan = sonuc;
             coinText.text = sonuc.ToString();
-        }
+        
 
         
         
         yield return new WaitForSeconds(0.5f);
         other.gameObject.SetActive(false);
+        upPanel.SetBool("kusYuvasi",false);
     }
 
     IEnumerator EngelList()
@@ -402,11 +610,17 @@ public class rockControll : MonoBehaviour
 
     IEnumerator rockDisintegration(GameObject rock,string value, bool boolean)
     {
-        yield return new WaitForSeconds(0.1f);
-        rock.GetComponent<Animator>().SetBool(value,boolean);
+        yield return new WaitForSeconds(0.0f);
+        //rock.GetComponent<Animator>().SetBool(value,boolean);
+        rock.transform.GetChild(2).gameObject.GetComponent<ParticleSystem>().Play();
+        rock.transform.GetChild(0).gameObject.SetActive(false);
+        rock.GetComponent<Collider>().enabled = false;
+        effectSound.clip = rockBreak;
+        effectSound.PlayOneShot(effectSound.clip);
+        
         coinPuan += 100;
         coinText.text = coinPuan.ToString();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.5f);
         rock.SetActive(false);
     }
 
@@ -447,18 +661,17 @@ public class rockControll : MonoBehaviour
 
     IEnumerator CamRot()
     {
-        yield return new WaitForSeconds(0f);
+        yield return new WaitForSeconds(1f);
         // ||cam.transform.rotation.x==0
         //rb.IsSleeping() || !cam.transform.hasChanged||cam.transform.rotation.x==0
-        if(rb.IsSleeping() || !cam.transform.hasChanged||cam.transform.rotation.x==0 )
+        //rb.IsSleeping() || !cam.transform.hasChanged||cam.transform.rotation.x==0 ||
+        if (isEnd)
         {
-            if (isEnd)
-            {
                 StartCoroutine(skorFinal());
                 winPanel.SetActive(true); 
-            }
-
         }
+
+        
 
         if (transform.hasChanged)
         {
@@ -470,7 +683,7 @@ public class rockControll : MonoBehaviour
 
     IEnumerator Final()
     {
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitForSeconds(2f);
         if (!winPanel.activeSelf)
         {
             StartCoroutine(skorFinal());
@@ -480,22 +693,17 @@ public class rockControll : MonoBehaviour
 
     IEnumerator rockStop(Rigidbody rock,GameObject other)
     {
-        yield return new WaitForSeconds(0.0f);
-        isMoving = false;
+        yield return new WaitForSeconds(0.25f);
         rockVelocityY = false;
-        isEnd = false;
-        rock.drag = 50;
-
-        StopCoroutine(cameraRot);
-        yield return  new WaitForSeconds(0.01f);
-        rock.isKinematic = true;
+        isMoving = false;
+        rock.drag = 5000000;
         
-        yield return new WaitForSeconds(0.10f);
+        yield return new WaitForSeconds(0.1f);
         rock.drag = 0.0001f;
-        rock.isKinematic = false;
-        yield return new WaitForSeconds(1f);
+        
+        yield return new WaitForSeconds(0.3f);
         rb.velocity=new Vector3(rb.velocity.x,-130,rb.velocity.z);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.6f);
         rb.velocity=new Vector3(rb.velocity.x,-160,rb.velocity.z);
         isMoving = true;
         yield return new WaitForSeconds(1f);
@@ -507,10 +715,8 @@ public class rockControll : MonoBehaviour
         yield return new WaitForSeconds(1f);
         rb.velocity=new Vector3(rb.velocity.x,-360,rb.velocity.z);
         rockVelocityY = true;
-        isEnd = true;
-        yield return new WaitForSeconds(1f);
-        cameraRot = CamRot();
-        StartCoroutine(cameraRot);
+       
+
     }
     
     IEnumerator RockPos()
@@ -566,12 +772,17 @@ public class rockControll : MonoBehaviour
     IEnumerator other()
     {
         yield return new WaitForSeconds(6);
-        if(GetComponent<rockControll>().enabled)
-            isEnd = true;
-        else
-        {
-            yield return other();
-        }
+        
+    }
+
+    IEnumerator isKinematic(Rigidbody rb,Collision other)
+    {
+        yield return new WaitForEndOfFrame();
+        rb.isKinematic = true;
+        isMoving = false;
+        yield return new WaitForSeconds(0.10f);
+        rb.isKinematic = false;
+        isMoving = true;
     }
 
     

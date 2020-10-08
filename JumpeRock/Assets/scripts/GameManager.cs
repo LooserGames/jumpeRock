@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ComponentsTrueandFalse()
     {
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(8f);
         if (!startPanel.activeSelf)
         {
             startPanel.SetActive(true);
@@ -43,10 +43,12 @@ public class GameManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
         startPanel.transform.GetChild(0).GetComponent<Animator>().SetBool("info",true);
         startPanel.transform.GetChild(1).GetComponent<Animator>().SetBool("start",true);
-        yield return new WaitForSeconds(1.1f);
+        poinPanel.transform.GetChild(0).GetComponent<Animator>().SetBool("baslangic",true);
+        yield return new WaitForSeconds(1.5f);
         startPanel.SetActive(false);
         yield return new WaitForSeconds(0.3f);
         poinPanel.SetActive(true);
+        poinPanel.transform.GetChild(0).GetComponent<Animator>().SetBool("baslangic",false);
         yield return new WaitForSeconds(0.7f);
         rock.GetComponent<rockControll>().enabled = true;
         rock.GetComponent<Rigidbody>().isKinematic = false;

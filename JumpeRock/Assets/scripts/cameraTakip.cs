@@ -18,7 +18,7 @@ public class cameraTakip : MonoBehaviour
        // transform.rotation=Quaternion.LookRotation(target.position);
         Vector3 desiredPosition = target.position + offset;
         Vector3 smoothedPosition;
-        if (target.GetComponent<rockControll>().isMoving)
+        if (target.GetComponent<rockControll>().isMoving && target.GetComponent<rockControll>().isMoving2 )
         {
             smoothedPosition = Vector3.Lerp(transform.position, new Vector3(target.transform.position.x,desiredPosition.y,transform.position.z), smoothSpeed);
 
